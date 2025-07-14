@@ -43,7 +43,6 @@ class LoginModel(BaseModel):
     email: EmailStr
     password: str
 
-# ---------------------- Auth Utilities ----------------------
 async def get_current_user(token: str = Cookie(default=None)):
     if not token:
         return None
@@ -66,7 +65,6 @@ async def require_user(token: str = Cookie(default=None)):
     except Exception as e:
         raise HTTPException(status_code=401, detail=f"Authentication failed: {str(e)}")
 
-# ---------------------- Routes ----------------------
 @app.post("/register")
 async def register(data: RegisterModel):
     existing_user = await users_collection.find_one({"email": data.email})
@@ -106,7 +104,6 @@ async def extract_text(
         image = Image.open(io.BytesIO(contents)).convert("RGB")
         image_np = np.array(image)
 
-        # OCR extraction
         results = reader.readtext(image_np)
         output = []
         for bbox, text, confidence in results:
@@ -117,11 +114,9 @@ async def extract_text(
                 "boundingBox": formatted_bbox
             })
 
-        # Upload original image
         filename = f"{uuid.uuid4()}.jpg"
         cloud_url = upload_to_cloudinary(contents, filename)
 
-        # Generate and upload hidden label image
         draw = ImageDraw.Draw(image)
         for item in output:
             bbox = item["boundingBox"]
@@ -131,18 +126,15 @@ async def extract_text(
             min_y, max_y = min(ys), max(ys)
             draw.rectangle([min_x, min_y, max_x, max_y], fill="white")
 
-        # Save hidden image
         hidden_byte_arr = io.BytesIO()
         image.save(hidden_byte_arr, format='JPEG')
         hidden_byte_arr = hidden_byte_arr.getvalue()
         hidden_filename = f"{uuid.uuid4()}_hidden.jpg"
         hidden_cloud_url = upload_to_cloudinary(hidden_byte_arr, hidden_filename)
 
-        # ✅ Step 1: Apply Canny edge detection
         gray = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY)
         edges = cv2.Canny(gray, threshold1=50, threshold2=150)
 
-        # ✅ Step 2: Convert edges to image and save to Cloudinary
         edges_pil = Image.fromarray(edges)
         edge_byte_arr = io.BytesIO()
         edges_pil.save(edge_byte_arr, format="JPEG")
@@ -150,7 +142,6 @@ async def extract_text(
         edge_filename = f"{uuid.uuid4()}_edges.jpg"
         edge_cloud_url = upload_to_cloudinary(edge_bytes, edge_filename)
 
-        # ✅ Step 3: Save everything to MongoDB
         insert_result = await ocr_collection.insert_one({
             "user_email": user["email"],
             "image_url": cloud_url,
