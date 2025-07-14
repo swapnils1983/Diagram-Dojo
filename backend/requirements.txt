@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+pydantic
+python-multipart
+Pillow
+easyocr
+numpy
+motor
+pymongo
+passlib[bcrypt]
+python-jose[cryptography]
+cloudinary
+python-dotenv
