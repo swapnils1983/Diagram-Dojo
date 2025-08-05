@@ -1,7 +1,9 @@
 import { useState } from "react";
 import axios from "axios";
+import { useAuth } from "../context/AuthContext";
 
 export default function AuthForm({ onAuth }) {
+    const { login } = useAuth();
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState("");
     const [name, setName] = useState("");
@@ -13,17 +15,33 @@ export default function AuthForm({ onAuth }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
-        const url = `${import.meta.env.VITE_API_URL}/${isLogin ? "login" : "register"}`;
-        const data = isLogin ? { email, password } : { email, password, name };
+
         try {
-            await axios.post(url, data, {
-                withCredentials: true,
-                headers: {
-                    "Content-Type": "application/json",
-                }
-            });
-            alert(isLogin ? "Logged in successfully! 🎉" : "Registered successfully! 🎉");
-            onAuth(true);
+            let success = true;
+
+            if (isLogin) {
+                success = await login(email, password);
+            } else {
+                const url = `${import.meta.env.VITE_API_URL}/register`;
+                const data = { email, password, name };
+
+                await axios.post(url, data, {
+                    withCredentials: true,
+                    headers: {
+                        "Content-Type": "application/json",
+                    }
+                });
+
+                success = await login(email, password);
+            }
+
+            if (success) {
+                alert(isLogin ? "Logged in successfully! 🎉" : "Registered successfully! 🎉");
+                onAuth(true);
+            } else {
+                alert("Authentication failed. Please try again.");
+            }
+
         } catch (err) {
             alert(`Auth failed: ${err.response?.data?.message || "Please try again"}`);
         } finally {
@@ -142,7 +160,7 @@ export default function AuthForm({ onAuth }) {
                     <div className="px-6 pb-6">
                         <div className="border-t border-gray-700 pt-4">
                             <p className="text-xs text-gray-400 text-center">
-                                By continuing, you agree to our <a href="#" className="text-indigo-400 hover:underline"> Terms</a> and <a href="#" className="text-indigo-400 hover:underline">Conditions</a>.
+                                By continuing, you agree to our <a href="#" className="text-indigo-400 hover:underline">Terms</a> and <a href="#" className="text-indigo-400 hover:underline">Conditions</a>.
                             </p>
                         </div>
                     </div>

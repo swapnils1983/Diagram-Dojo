@@ -7,6 +7,10 @@ export default function Navbar({ activeTab }) {
     const navigate = useNavigate();
     const isLoggedIn = !!user;
 
+    const handleLogout = async () => {
+        await logout();
+        navigate("/");
+    };
     return (
         <nav className="bg-gray-800 shadow-sm border-b border-gray-700">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -42,7 +46,7 @@ export default function Navbar({ activeTab }) {
                         )}
                         {isLoggedIn && (
                             <button
-                                onClick={logout}
+                                onClick={handleLogout}
                                 className="flex items-center gap-1 px-3 py-2 rounded-lg text-gray-300 hover:text-indigo-400 transition-colors"
                             >
                                 <FiLogOut /> Logout

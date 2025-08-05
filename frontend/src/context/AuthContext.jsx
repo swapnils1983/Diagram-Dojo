@@ -24,7 +24,6 @@ export const AuthProvider = ({ children }) => {
         try {
             await axiosInstance.post('/login', { email, password });
 
-            // ✅ FIX: use axiosInstance again here (not axios)
             const { data } = await axiosInstance.get('/user');
             setUser(data);
             return true;
