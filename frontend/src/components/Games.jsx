@@ -105,7 +105,7 @@ function Games() {
                                 results={results}
                                 setActiveGame={setActiveGame}
                             />
-                            <AIExplanation />
+                            {/* <AIExplanation /> */}
                             <GameCards
                                 setActiveGame={setActiveGame}
                                 includeDiagramBuilder={true}
